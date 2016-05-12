@@ -1,0 +1,11 @@
+{
+  "name": "map-view",
+  "version": "1.0.0",
+  "description": "0.1.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "Dmytro Kovalchuk <dimasmith@gmail.com>",
+  "license": "MIT"
+}
