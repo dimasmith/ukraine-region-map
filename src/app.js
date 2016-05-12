@@ -16,9 +16,10 @@ function init() {
       new ImageSize.of(canvas),
       new Offset(17, 22, 13, 18));
   var projectionView = new MapView(canvas.getContext('2d'), projector);
-  projectionView.updateModel({points:
-      [poi.gremyach, poi.foros, poi.solomonovo, poi.rannyaZorya, poi.kyiv, poi.lviv, poi.odesa, poi.kharkiv]
+  var geoPoints = points.map(function (p) {
+    return new GeoPoint(p.lat, p.lon);
   });
+  projectionView.updateModel({points: geoPoints});
 }
 
 document.onload = init();
