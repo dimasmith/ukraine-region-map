@@ -1,4 +1,4 @@
-var ImageSize = function(width, height) {
+var ImageSize = function (width, height) {
   this.width = width;
   this.height = height;
 };
@@ -14,7 +14,7 @@ var GeoBounds = function (leftLon, topLat, rightLon, bottomLat) {
   this.bottomLat = bottomLat;
 };
 
-var Offset = function(left, top, right, bottom) {
+var Offset = function (left, top, right, bottom) {
   this.left = left;
   this.top = top;
   this.right = right;
@@ -23,32 +23,58 @@ var Offset = function(left, top, right, bottom) {
 
 Offset.ZERO = new Offset(0, 0, 0, 0);
 
-var MillerProjection = function(geoBounds, imageSize, offset) {
-  this.geoBounds = geoBounds;
+var MillerProjection = function (geoBounds, imageSize, offset) {
   this.offset = offset || Offset.ZERO;
   this.imageWidth = imageSize.width - this.offset.left - this.offset.right;
   this.imageHeight = imageSize.height - this.offset.top - this.offset.bottom;
+  this.projectedLeftLonBound = MillerProjection.projectX(geoBounds.leftLon);
+  this.projectedTopLatBound = MillerProjection.projectY(geoBounds.topLat);
+  this.projectedXRatio = (this.imageWidth / (MillerProjection.projectX(geoBounds.rightLon) - this.projectedLeftLonBound));
+  this.projectedYRatio = (this.imageHeight / (this.projectedTopLatBound - MillerProjection.projectY(geoBounds.bottomLat)));
 };
 
-function toRadians(deg) {
+MillerProjection.toRadians = function (deg) {
   return deg * Math.PI / 180;
-}
+};
 
-function millerX(lon) {
-  return toRadians(lon);
-}
+MillerProjection.projectX = function (lon) {
+  return MillerProjection.toRadians(lon);
+};
 
-function millerY(lat) {
-  return ((5 / 4) + Math.log(Math.abs(Math.tan((Math.PI / 4) + (2 / 5 * toRadians(lat))))));
-}
+MillerProjection.projectY = function (lat) {
+  return 1.25 + Math.log(Math.abs(Math.tan((Math.PI / 4) + (0.4 * MillerProjection.toRadians(lat)))));
+};
 
 MillerProjection.prototype.project = function (geoPoint) {
-  var bounds = this.geoBounds;
-  var x = (millerX(geoPoint.lon) - millerX(bounds.leftLon))
-      * (this.imageWidth / (millerX(bounds.rightLon) - millerX(bounds.leftLon)))
-      + this.offset.left;
-  var y = (millerY(bounds.topLat) - millerY(geoPoint.lat))
-      * (this.imageHeight / (millerY(bounds.topLat) - millerY(bounds.bottomLat)))
-      + this.offset.top;
+  var x = (MillerProjection.projectX(geoPoint.lon) - this.projectedLeftLonBound) * this.projectedXRatio + this.offset.left;
+  var y = (this.projectedTopLatBound - MillerProjection.projectY(geoPoint.lat)) * this.projectedYRatio + this.offset.top;
+  return new Point(x, y);
+};
+
+var MerkatorProjection = function (geoBounds, imageSize, offset) {
+  this.offset = offset || Offset.ZERO;
+  this.imageWidth = imageSize.width - this.offset.left - this.offset.right;
+  this.imageHeight = imageSize.height - this.offset.top - this.offset.bottom;
+  this.projectedLeftLonBound = MerkatorProjection.projectX(geoBounds.leftLon);
+  this.projectedTopLatBound = MerkatorProjection.projectY(geoBounds.topLat);
+  this.projectedXRatio = (this.imageWidth / (MerkatorProjection.projectX(geoBounds.rightLon) - this.projectedLeftLonBound));
+  this.projectedYRatio = (this.imageHeight / (this.projectedTopLatBound - MerkatorProjection.projectY(geoBounds.bottomLat)));
+};
+
+MerkatorProjection.toRadians = function (deg) {
+  return deg * Math.PI / 180;
+};
+
+MerkatorProjection.projectX = function (lon) {
+  return MerkatorProjection.toRadians(lon);
+};
+
+MerkatorProjection.projectY = function (lat) {
+  return Math.log(Math.abs(Math.tan((Math.PI / 4) + (0.5 * MerkatorProjection.toRadians(lat)))));
+};
+
+MerkatorProjection.prototype.project = function (geoPoint) {
+  var x = (MerkatorProjection.projectX(geoPoint.lon) - this.projectedLeftLonBound) * this.projectedXRatio + this.offset.left;
+  var y = (this.projectedTopLatBound - MerkatorProjection.projectY(geoPoint.lat)) * this.projectedYRatio + this.offset.top;
   return new Point(x, y);
 };

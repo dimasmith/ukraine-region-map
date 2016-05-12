@@ -1,5 +1,5 @@
 var poi = {
-  gremyach: new GeoPoint(52.2004, 33.1219),
+  gremyach: new GeoPoint(52.2004, 33.1719),
   foros: new GeoPoint(44.2311, 33.4638),
   solomonovo: new GeoPoint(48.2250, 22.0950),
   rannyaZorya: new GeoPoint(49.1533, 40.1153),
@@ -11,15 +11,16 @@ var poi = {
 
 function init() {
   var canvas = document.getElementById('map');
-  var projector = new MillerProjection(
+  var projector = new MerkatorProjection(
       new GeoBounds(poi.solomonovo.lon, poi.gremyach.lat, poi.rannyaZorya.lon, poi.foros.lat),
       new ImageSize.of(canvas),
       new Offset(17, 22, 13, 18));
-  var projectionView = new MapView(canvas.getContext('2d'), projector);
+  var projectionView = new MapView(canvas, projector);
   var geoPoints = points.map(function (p) {
     return new GeoPoint(p.lat, p.lon);
   });
   projectionView.updateModel({points: geoPoints});
+  // projectionView.updateModel({points: [poi.gremyach, poi.foros, poi.solomonovo, poi.rannyaZorya]})
 }
 
 document.onload = init();
