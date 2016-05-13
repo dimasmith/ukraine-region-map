@@ -1,4 +1,4 @@
-var GeoPoint = function(lat, lon) {
+var GeoPoint = function (lat, lon) {
   this.lat = lat;
   this.lon = lon;
 };

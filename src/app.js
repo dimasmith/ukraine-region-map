@@ -12,14 +12,15 @@ var poi = {
 function init() {
   var canvas = document.getElementById('map');
   var projector = new MerkatorProjection(
-      new GeoBounds(poi.solomonovo.lon, poi.gremyach.lat, poi.rannyaZorya.lon, poi.foros.lat),
-      new ImageSize.of(canvas),
-      new Offset(17, 22, 13, 18));
+    new GeoBounds(poi.solomonovo.lon, poi.gremyach.lat, poi.rannyaZorya.lon, poi.foros.lat),
+    new ImageSize.of(canvas),
+    new Offset(17, 22, 13, 18));
   var projectionView = new MapView(canvas, projector);
-  var geoPoints = points.map(function (p) {
-    return new GeoPoint(p.lat, p.lon);
-  });
-  projectionView.updateModel({points: geoPoints});
+  projectionView.render();
+  // var geoPoints = points.map(function (p) {
+  //   return new GeoPoint(p.lat, p.lon);
+  // });
+  // projectionView.updateModel({points: geoPoints});
   // projectionView.updateModel({points: [poi.gremyach, poi.foros, poi.solomonovo, poi.rannyaZorya]})
 }
 
