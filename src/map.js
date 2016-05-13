@@ -7,7 +7,7 @@ var MapView = function (canvas, projector) {
   // initialize background
   var backgroundImage = new Image();
   backgroundImage.onload = this.renderBackground.bind(this, backgroundImage);
-  backgroundImage.src = 'assets/giz2-map-transparent.png';
+  backgroundImage.src = 'assets/giz2-map-white.png';
   this.backgroundReady = false;
 };
 
