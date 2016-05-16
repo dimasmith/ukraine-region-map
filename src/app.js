@@ -40,17 +40,15 @@ function init() {
   projectionView.render();
   var g = canvas.getContext('2d');
   canvas.onclick = function (evt) {
-    // var x = evt.layerX;
-    // var y = evt.layerY;
-    // floodFill(g, x, y, [255, 255, 255, 255], randomColor(), canvas.width, canvas.height);
-
     var threshold = 48;
     var counter = 0;
+    var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
     console.time('paint-regions');
-    for (var x = 0; x < canvas.width; x++) {
-      for (var y = 0; y < canvas.height; y++) {
-        if (isEqualColors(getColor(g, x, y), [255, 255, 255, 255])) {
-          var filled = floodFill(g, x, y, [255, 255, 255, 255], randomColor(), canvas.width, canvas.height);
+    // floodFill(imageData, evt.layerX, evt.layerY, [255, 255, 255, 255], randomColor(), g)
+    for (var x = 0; x < imageData.width; x++) {
+      for (var y = 0; y < imageData.height; y++) {
+        if (isEqualColors(getColor(imageData, x, y), [255, 255, 255, 255])) {
+          var filled = floodFill(imageData, x, y, [255, 255, 255, 255], [0, 255, 64, 255], g);
           if (filled > threshold) {
             counter++;
             // console.log('Raion added', counter);
@@ -60,7 +58,8 @@ function init() {
         }
       }
     }
-    // console.log('Regions found', counter);
+    g.putImageData(imageData, 0, 0);
+    console.log('Regions found', counter);
     console.timeEnd('paint-regions');
   };
 

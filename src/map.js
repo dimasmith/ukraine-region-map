@@ -13,9 +13,9 @@ var MapView = function (canvas, projector) {
 
 MapView.prototype.renderBackground = function (backgroundImage) {
   this.g.save();
-  this.g.translate(this.width / 2, this.height / 2);
-  this.g.rotate(Math.PI * 2 / 180);
-  this.g.translate(-this.width / 2, -this.height / 2);
+  // this.g.translate(this.width / 2, this.height / 2);
+  // this.g.rotate(Math.PI * 2 / 180);
+  // this.g.translate(-this.width / 2, -this.height / 2);
   // this.g.translate(0, -30);
   this.g.drawImage(backgroundImage, 0, 0);
   this.g.restore();

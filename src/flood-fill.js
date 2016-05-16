@@ -11,59 +11,64 @@ function toRGBA(rasterData) {
   return 'rgba(' + rasterData.join(',') + ')';
 }
 
-function getColor(g, x, y) {
-  return g.getImageData(x, y, 1, 1).data;
+function getColor(imageData, x, y) {
+  var startIndex = y * imageData.width * 4 + x * 4;
+  return [imageData.data[startIndex],
+    imageData.data[startIndex + 1],
+    imageData.data[startIndex + 2],
+    imageData.data[startIndex + 3]];
 }
 
-function floodFill(g, x, y, replacedColor, targetColor, width, height) {
-  g.save();
-  g.strokeStyle = toRGBA(targetColor);
-  g.lineWidth = 1;
+function setColor(imageData, x, y, color) {
+  var startIndex = y * imageData.width * 4 + x * 4;
+  for (var i = 0; i < 4; i++) {
+    imageData.data[startIndex + i] = color[i];
+  }
+}
+
+function floodFill(imageData, x, y, replacedColor, targetColor) {
   var filledPixelsCount = 0;
   var pixelQueue = [];
-  var color = getColor(g, x, y);
+  var color = getColor(imageData, x, y);
   if (!isEqualColors(color, replacedColor)) {
-    g.restore();
     return filledPixelsCount;
   }
   pixelQueue.push({x: x, y: y});
   while (pixelQueue.length > 0) {
     var n = pixelQueue.shift();
-    if (isEqualColors(getColor(g, n.x, n.y), replacedColor)) {
-      var w = n;
-      var e = n;
-      while (isEqualColors(getColor(g, w.x, w.y), replacedColor)) {
-        w = {x: w.x - 1, y: w.y};
-      }
-      while (isEqualColors(getColor(g, e.x, e.y), replacedColor)) {
-        e = {x: e.x + 1, y: e.y};
-      }
+    if (!isEqualColors(getColor(imageData, n.x, n.y), replacedColor)) {
+      continue;
+    }
+    var west = {x: n.x, y: n.y};
+    var east = {x: n.x, y: n.y};
+    while (isEqualColors(getColor(imageData, west.x, west.y), replacedColor)) {
+      west = {x: west.x - 1, y: west.y};
+    }
+    while (isEqualColors(getColor(imageData, east.x, east.y), replacedColor)) {
+      east = {x: east.x + 1, y: east.y};
+    }
 
-      var startX = Math.max(0, w.x);
-      var endX = Math.min(width, e.x);
-      var line = g.getImageData(startX, n.y, endX - startX, 1);
-      for (var i = 0; i < line.data.length; i += 4) {
-        line.data[i] = targetColor[0];
-        line.data[i + 1] = targetColor[1];
-        line.data[i + 2] = targetColor[2];
-        line.data[i + 3] = targetColor[3];
-      }
-      g.putImageData(line, startX, n.y);
+    // var startX = Math.max(0, west.x);
+    // var endX = Math.min(imageData.width, east.x);
+    var startX = west.x;
+    var endX = east.x;
+    for (var j = startX + 1; j < endX; j++) {
+      setColor(imageData, j, n.y, targetColor);
+    }
 
-      for (var i = Math.max(0, w.x); i < endX; i++) {
-        var north = {x: i, y: n.y - 1};
-        var south = {x: i, y: n.y + 1};
-        if (isEqualColors(getColor(g, north.x, north.y), replacedColor) && north.y >= 0) {
-          pixelQueue.push(north);
-          filledPixelsCount++;
-        }
-        if (isEqualColors(getColor(g, south.x, south.y), replacedColor) && south.y < height) {
-          pixelQueue.push(south);
-          filledPixelsCount++;
-        }
+    for (var i = startX; i < endX; i++) {
+      var north = {x: i, y: n.y - 1};
+      var south = {x: i, y: n.y + 1};
+      if (isEqualColors(getColor(imageData, north.x, north.y), replacedColor) && north.y >= 0) {
+        pixelQueue.push(north);
+        filledPixelsCount++;
+      }
+      if (isEqualColors(getColor(imageData, south.x, south.y), replacedColor) && south.y < imageData.height) {
+        pixelQueue.push(south);
+        filledPixelsCount++;
       }
     }
   }
-  g.restore();
+  // g.putImageData(imageData, 0, 0);
   return filledPixelsCount;
 }
