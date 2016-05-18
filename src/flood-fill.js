@@ -1,6 +1,9 @@
-export function isEqualColors(color, otherColor) {
+export function isEqualColors(color, otherColor, tolerance = 0) {
   for (var i = 0; i < 4; i++) {
-    if (color[i] != otherColor[i]) {
+    const minComp = color[i] - color[i] * (tolerance / 2);
+    const maxComp = color[i] + color[i] * (tolerance / 2);
+    var colorComp = otherColor[i];
+      if (colorComp < minComp || colorComp > maxComp) {
       return false;
     }
   }
@@ -13,10 +16,7 @@ function toRGBA(rasterData) {
 
 export function getColor(imageData, x, y) {
   var startIndex = y * imageData.width * 4 + x * 4;
-  return [imageData.data[startIndex],
-    imageData.data[startIndex + 1],
-    imageData.data[startIndex + 2],
-    imageData.data[startIndex + 3]];
+  return imageData.data.slice(startIndex, startIndex + 4);
 }
 
 export function setColor(imageData, x, y, color) {
@@ -69,6 +69,58 @@ export function floodFill(imageData, x, y, replacedColor, targetColor) {
       }
     }
   }
-  // g.putImageData(imageData, 0, 0);
   return filledPixelsCount;
+}
+
+export function detectRegion(imageData, x, y, fillColor) {
+  const pixelQueue = [];
+  const shape = [];
+  const points = {};
+
+  const key = (point) => `${point.x};${point.y}`;
+
+  const pointShouldBeFilled = (point) => {
+    return isEqualColors(getColor(imageData, point.x, point.y), fillColor) && !points[key(point)];
+  };
+
+  if (!pointShouldBeFilled({x, y})) {
+    return [];
+  }
+  pixelQueue.push({x: x, y: y});
+  while (pixelQueue.length > 0) {
+    var n = pixelQueue.shift();
+    if (!pointShouldBeFilled(n)) {
+      continue;
+    }
+    var west = {x: n.x, y: n.y};
+    var east = {x: n.x, y: n.y};
+    while (pointShouldBeFilled(west)) {
+      west = {x: west.x - 1, y: west.y};
+    }
+    while (pointShouldBeFilled(east)) {
+      east = {x: east.x + 1, y: east.y};
+    }
+
+    var startX = west.x;
+    var endX = east.x;
+    for (var j = startX + 1; j < endX; j++) {
+      const point = {x: j, y: n.y};
+      if (!points[key(point)]) {
+        points[key(point)] = point;
+        shape.push(point);
+      }
+    }
+
+    for (var i = startX; i < endX; i++) {
+      var north = {x: i, y: n.y - 1};
+      var south = {x: i, y: n.y + 1};
+      if (pointShouldBeFilled(north) && north.y >= 0) {
+        pixelQueue.push(north);
+      }
+      if (pointShouldBeFilled(south) && south.y < imageData.height) {
+        pixelQueue.push(south);
+      }
+    }
+  }
+  return shape;
 }
