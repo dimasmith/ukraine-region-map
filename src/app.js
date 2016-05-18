@@ -1,25 +1,7 @@
-import MapView from './map';
-import {setColor, detectRegion} from './flood-fill';
-import mapImage from 'url?!../assets/giz2-map-white.png';
-
-class PointIndex {
-  constructor() {
-    this.points = {};
-  }
-
-  addPoint(point) {
-    const {x, y} = point;
-    if (!this.points[x]) {
-      this.points[x] = {};
-    }
-    this.points[y] = point;
-  }
-
-  hasPoint(point) {
-    const {x, y} = point;
-    return this.points[x] && this.points[x][y];
-  }
-}
+import MapView from "./map";
+import {setColor, detectRegion} from "./flood-fill";
+import mapImage from "url?!../assets/giz2-map-white.png";
+import PointIndex from "./point-index";
 
 function init() {
 
@@ -52,8 +34,8 @@ function init() {
 
     const isPointOnMargin = (point) => {
       const {x, y} = point;
-      for(var dx = -1; dx <= 1; dx++) {
-        for(var dy = -1; dy <= 1; dy++) {
+      for (var dx = -1; dx <= 1; dx++) {
+        for (var dy = -1; dy <= 1; dy++) {
           if (!pointIndex.hasPoint({x: x + dx, y: y + dy})) {
             return true;
           }
@@ -63,12 +45,14 @@ function init() {
     };
 
     const raionCtx = raionViewCanvas.getContext('2d');
-    // raionCtx.fillStyle = '#face8d';
     raionCtx.fillRect(0, 0, raionViewCanvas.width, raionViewCanvas.height);
     const raionImageData = raionCtx.getImageData(0, 0, raionViewCanvas.width, raionViewCanvas.height);
     const shapeOutline = shape.filter(isPointOnMargin);
     console.table(shapeOutline);
-    const translatedShape = shapeOutline.map((point) => ({x: point.x - minX + raionViewCanvas.width / 2, y: point.y - minY + raionViewCanvas.height / 2}));
+    const translatedShape = shapeOutline.map((point) => ({
+      x: point.x - minX + raionViewCanvas.width / 2,
+      y: point.y - minY + raionViewCanvas.height / 2
+    }));
     translatedShape.forEach((point) => setColor(raionImageData, point.x, point.y, [0, 196, 64, 255]));
     raionCtx.putImageData(raionImageData, 0, 0);
 
