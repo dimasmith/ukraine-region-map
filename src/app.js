@@ -44,19 +44,56 @@ function init() {
       return false;
     };
 
+    const hasFilledMargin = (point) => {
+      const {x, y} = point;
+      for (var dx = -1; dx <= 1; dx++) {
+        for (var dy = -1; dy <= 1; dy++) {
+          if (pointIndex.hasPoint({x: x + dx, y: y + dy})) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
     const raionCtx = raionViewCanvas.getContext('2d');
+    raionCtx.fillStyle = '#cccccc';
     raionCtx.fillRect(0, 0, raionViewCanvas.width, raionViewCanvas.height);
-    const raionImageData = raionCtx.getImageData(0, 0, raionViewCanvas.width, raionViewCanvas.height);
     const shapeOutline = shape.filter(isPointOnMargin);
-    console.table(shapeOutline);
-    const translatedShape = shapeOutline.map((point) => ({
+    const outlineIndex = new PointIndex();
+    shapeOutline.forEach(point => outlineIndex.addPoint(point));
+
+    const translatedOutline = shapeOutline.map((point) => ({
       x: point.x - minX + raionViewCanvas.width / 2,
       y: point.y - minY + raionViewCanvas.height / 2
     }));
-    translatedShape.forEach((point) => setColor(raionImageData, point.x, point.y, [0, 196, 64, 255]));
+    const translatedArea = shape.map((point) => ({
+      x: point.x - minX + raionViewCanvas.width / 2,
+      y: point.y - minY + raionViewCanvas.height / 2
+    }));
+    const raionImageData = raionCtx.getImageData(0, 0, raionViewCanvas.width, raionViewCanvas.height);
+    translatedArea.forEach((point) => setColor(raionImageData, point.x, point.y, [255, 255, 0, 255]));
     raionCtx.putImageData(raionImageData, 0, 0);
+    translatedOutline.sort((a, b) => (a.x + a.y) - (b.x + b.y));
+    debugPaint(raionImageData, translatedOutline, 100, () => raionCtx.putImageData(raionImageData, 0, 0));
 
   };
+}
+
+function debugPaint(imageData, points, interval = 100, repaint ) {
+  let startTime = null;
+  let i = 0;
+  function render(timestamp) {
+    const point = points[i];
+    setColor(imageData, point.x, point.y, [0, 0, 255, 255]);
+    repaint();
+    i++;
+    if (i < points.length) {
+      requestAnimationFrame(render);
+    }
+  }
+
+  requestAnimationFrame(render);
 }
 
 document.onload = init();
