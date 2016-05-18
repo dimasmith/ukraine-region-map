@@ -1,3 +1,9 @@
+import MapView from './map';
+import MerkatorProjection, {GeoBounds, ImageSize, Offset} from './projections';
+import {GeoPoint} from './api';
+import {isEqualColors, getColor, floodFill} from './flood-fill';
+import mapImage from 'url?!../assets/giz2-map-white.png';
+
 var poi = {
   gremyach: new GeoPoint(52.2004, 33.1719),
   foros: new GeoPoint(44.2311, 33.4638),
@@ -31,12 +37,16 @@ function randomColor() {
 }
 
 function init() {
-  var canvas = document.getElementById('map');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 982;
+  canvas.height = 673;
+  document.body.appendChild(canvas);
   var projector = new MerkatorProjection(
     new GeoBounds(poi.solomonovo.lon, poi.gremyach.lat, poi.rannyaZorya.lon, poi.foros.lat),
     new ImageSize.of(canvas),
     new Offset(17, 22, 13, 18));
-  var projectionView = new MapView(canvas, projector);
+  var projectionView = new MapView(canvas, projector, mapImage);
   projectionView.render();
   var g = canvas.getContext('2d');
   canvas.onclick = function (evt) {

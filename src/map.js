@@ -1,4 +1,4 @@
-var MapView = function (canvas, projector) {
+var MapView = function (canvas, projector, background) {
   this.g = canvas.getContext('2d');
   this.width = canvas.width;
   this.height = canvas.height;
@@ -7,7 +7,7 @@ var MapView = function (canvas, projector) {
   // initialize background
   var backgroundImage = new Image();
   backgroundImage.onload = this.renderBackground.bind(this, backgroundImage);
-  backgroundImage.src = 'assets/giz2-map-white.png';
+  backgroundImage.src = background;
   this.backgroundReady = false;
 };
 
@@ -44,3 +44,5 @@ MapView.prototype.render = function () {
     this.model.points.forEach(this.renderPoint.bind(this));
   }
 };
+
+export default MapView;

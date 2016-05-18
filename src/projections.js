@@ -1,4 +1,4 @@
-var ImageSize = function (width, height) {
+export const ImageSize = function (width, height) {
   this.width = width;
   this.height = height;
 };
@@ -7,14 +7,14 @@ ImageSize.of = function (element) {
   return new ImageSize(element.width, element.height);
 };
 
-var GeoBounds = function (leftLon, topLat, rightLon, bottomLat) {
+export const GeoBounds = function (leftLon, topLat, rightLon, bottomLat) {
   this.leftLon = leftLon;
   this.topLat = topLat;
   this.rightLon = rightLon;
   this.bottomLat = bottomLat;
 };
 
-var Offset = function (left, top, right, bottom) {
+export const Offset = function (left, top, right, bottom) {
   this.left = left;
   this.top = top;
   this.right = right;
@@ -78,3 +78,5 @@ MerkatorProjection.prototype.project = function (geoPoint) {
   var y = (this.projectedTopLatBound - MerkatorProjection.projectY(geoPoint.lat)) * this.projectedYRatio + this.offset.top;
   return new Point(x, y);
 };
+
+export default MerkatorProjection;

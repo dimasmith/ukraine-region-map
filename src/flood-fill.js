@@ -1,4 +1,4 @@
-function isEqualColors(color, otherColor) {
+export function isEqualColors(color, otherColor) {
   for (var i = 0; i < 4; i++) {
     if (color[i] != otherColor[i]) {
       return false;
@@ -11,7 +11,7 @@ function toRGBA(rasterData) {
   return 'rgba(' + rasterData.join(',') + ')';
 }
 
-function getColor(imageData, x, y) {
+export function getColor(imageData, x, y) {
   var startIndex = y * imageData.width * 4 + x * 4;
   return [imageData.data[startIndex],
     imageData.data[startIndex + 1],
@@ -19,14 +19,14 @@ function getColor(imageData, x, y) {
     imageData.data[startIndex + 3]];
 }
 
-function setColor(imageData, x, y, color) {
+export function setColor(imageData, x, y, color) {
   var startIndex = y * imageData.width * 4 + x * 4;
   for (var i = 0; i < 4; i++) {
     imageData.data[startIndex + i] = color[i];
   }
 }
 
-function floodFill(imageData, x, y, replacedColor, targetColor) {
+export function floodFill(imageData, x, y, replacedColor, targetColor) {
   var filledPixelsCount = 0;
   var pixelQueue = [];
   var color = getColor(imageData, x, y);
