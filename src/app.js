@@ -1,7 +1,25 @@
 import MapView from './map';
-import {GeoPoint} from './api';
-import {isEqualColors, getColor, floodFill, setColor, detectRegion} from './flood-fill';
+import {setColor, detectRegion} from './flood-fill';
 import mapImage from 'url?!../assets/giz2-map-white.png';
+
+class PointIndex {
+  constructor() {
+    this.points = {};
+  }
+
+  addPoint(point) {
+    const {x, y} = point;
+    if (!this.points[x]) {
+      this.points[x] = {};
+    }
+    this.points[y] = point;
+  }
+
+  hasPoint(point) {
+    const {x, y} = point;
+    return this.points[x] && this.points[x][y];
+  }
+}
 
 function init() {
 
@@ -24,19 +42,36 @@ function init() {
     var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
     const shape = detectRegion(imageData, evt.layerX, evt.layerY, [255, 255, 255, 255]);
     // paint raion
-    // const minX = shape.reduce((min, point) => Math.min(min, point.x), canvas.width);
-    // const minY = shape.reduce((min, point) => Math.min(min, point.y), canvas.height);
-    // console.log(minX, minY);
-    const minX = 394;
-    const minY = 97;
+    const minX = shape.reduce((min, point) => Math.min(min, point.x), canvas.width);
+    const minY = shape.reduce((min, point) => Math.min(min, point.y), canvas.height);
+
+    // outline
+    // console.table(shape);
+    const pointIndex = new PointIndex();
+    shape.forEach((point) => pointIndex.addPoint(point));
+
+    const isPointOnMargin = (point) => {
+      const {x, y} = point;
+      for(var dx = -1; dx <= 1; dx++) {
+        for(var dy = -1; dy <= 1; dy++) {
+          if (!pointIndex.hasPoint({x: x + dx, y: y + dy})) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
 
     const raionCtx = raionViewCanvas.getContext('2d');
     // raionCtx.fillStyle = '#face8d';
-    // raionCtx.fillRect(0, 0, raionViewCanvas.width, raionViewCanvas.height);
+    raionCtx.fillRect(0, 0, raionViewCanvas.width, raionViewCanvas.height);
     const raionImageData = raionCtx.getImageData(0, 0, raionViewCanvas.width, raionViewCanvas.height);
-    const translatedShape = shape.map((point) => ({x: point.x - minX, y: point.y - minY}));
+    const shapeOutline = shape.filter(isPointOnMargin);
+    console.table(shapeOutline);
+    const translatedShape = shapeOutline.map((point) => ({x: point.x - minX + raionViewCanvas.width / 2, y: point.y - minY + raionViewCanvas.height / 2}));
     translatedShape.forEach((point) => setColor(raionImageData, point.x, point.y, [0, 196, 64, 255]));
     raionCtx.putImageData(raionImageData, 0, 0);
+
   };
 }
 
