@@ -2,6 +2,32 @@ import MapView from "./map";
 import {setColor, detectRegion} from "./flood-fill";
 import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
+import trackPath from "./path-tracker";
+
+// Neighbor points
+const NW = {dx: -1, dy: -1, direction: 'NW'};
+const N = {dx: 0, dy: -1, direction: 'N'};
+const NE = {dx: 1, dy: -1, direction: 'NE'};
+const E = {dx: 1, dy: 0, direction: 'E'};
+const SE = {dx: 1, dy: 1, direction: 'SE'};
+const S = {dx: 0, dy: 1, direction: 'S'};
+const SW = {dx: -1, dy: 1, direction: 'SW'};
+const W = {dx: -1, dy: 0, direction: 'W'};
+const CCW = [N, NE, E, SE, S, SW, W, NW];
+const neighborOn = (point, direction) => ({x: point.x + direction.dx, y: point.y + direction.dy});
+
+function ccwStartingOn(direction = W) {
+  const startIndex = CCW.indexOf(direction);
+  return CCW.slice(startIndex).concat(CCW.slice(0, startIndex));
+}
+
+function ccwStartingAfter(direction = W) {
+  if (direction === NW) {
+    return CCW;
+  }
+  const startIndex = CCW.indexOf(direction);
+  return ccwStartingOn(CCW[startIndex + 1]);
+}
 
 function init() {
   const zoomDebugCanvas = document.createElement('canvas');
@@ -37,18 +63,6 @@ function init() {
     const areaPointIndex = new PointIndex();
     area.forEach((point) => areaPointIndex.addPoint(point));
 
-    // Neighbor points
-    const NW = {dx: -1, dy: -1};
-    const N = {dx: 0, dy: -1};
-    const NE = {dx: 1, dy: -1};
-    const E = {dx: 1, dy: 0};
-    const SE = {dx: 1, dy: 1};
-    const S = {dx: 0, dy: 1};
-    const SW = {dx: -1, dy: 1};
-    const W = {dx: -1, dy: 0};
-    const CCW = [N, NE, E, SE, S, SW, W, NW];
-    const neighborOn = (point, direction) => ({x: point.x + direction.dx, y: point.y + direction.dy});
-
     const isPointOnMargin = (point) => {
       return CCW.map((direction) => neighborOn(point, direction))
         .some((point) => !areaPointIndex.hasPoint(point));
@@ -72,27 +86,9 @@ function init() {
     districtCtx.putImageData(districtImageData, 0, 0);
 
     const outlineIndex = new PointIndex(translatedOutline);
-    const visitedIndex = new PointIndex();
     const startingPoint = translatedOutline[0];
-    const pointList = [];
-    pointList.push(startingPoint);
-    let previousPoint = startingPoint;
-    for (let i = 0; i < translatedOutline.length; i++) {
-      if (!previousPoint) {
-        break;
-      }
-      visitedIndex.addPoint(previousPoint);
-      let nextDirection = CCW.find((direction) => {
-        const neighborPoint = neighborOn(previousPoint, direction);
-        return outlineIndex.hasPoint(neighborPoint) && !visitedIndex.hasPoint(neighborPoint);
-      });
-      if (!nextDirection) {
-        break;
-      }
-      let nextPoint = neighborOn(previousPoint, nextDirection);
-      pointList.push(nextPoint);
-      previousPoint = nextPoint;
-    }
+    
+    const pointList = trackPath(outlineIndex, startingPoint);
 
     translatedOutline.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 0, 0, 255]));
     districtCtx.putImageData(districtImageData, 0, 0);
