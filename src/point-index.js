@@ -1,6 +1,7 @@
 export default class PointIndex {
-  constructor() {
+  constructor(points = []) {
     this.points = {};
+    points.forEach((point) => this.addPoint(point));
   }
 
   addPoint(point) {
