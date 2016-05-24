@@ -1,78 +1,85 @@
-import MapView from './map';
-import {setColor, detectRegion} from './flood-fill';
-import mapImage from 'url?!../assets/giz2-map-white.png';
-
-class PointIndex {
-  constructor() {
-    this.points = {};
-  }
-
-  addPoint(point) {
-    const {x, y} = point;
-    if (!this.points[x]) {
-      this.points[x] = {};
-    }
-    this.points[y] = point;
-  }
-
-  hasPoint(point) {
-    const {x, y} = point;
-    return this.points[x] && this.points[x][y];
-  }
-}
+import MapView from "./map";
+import {setColor, detectRegion} from "./flood-fill";
+import mapImage from "url?!../assets/giz2-map-white.png";
+import PointIndex from "./point-index";
+import trackPath, {outline} from "./path-tracker";
 
 function init() {
+  const zoomDebugCanvas = document.createElement('canvas');
+  zoomDebugCanvas.width = 400;
+  zoomDebugCanvas.height = 400;
+  // document.querySelector('body').appendChild(zoomDebugCanvas);
+
+  const districtViewCanvas = document.createElement('canvas');
+  districtViewCanvas.width = 100;
+  districtViewCanvas.height = 100;
 
   const canvas = document.createElement('canvas');
   canvas.width = 982;
   canvas.height = 673;
-  document.querySelector('body').appendChild(canvas);
 
-  const raionViewCanvas = document.createElement('canvas');
-  raionViewCanvas.width = 200;
-  raionViewCanvas.height = 200;
-  document.querySelector('body').appendChild(raionViewCanvas);
+  document.querySelector('body').appendChild(canvas);
+  document.querySelector('body').appendChild(districtViewCanvas);
 
   var mapView = new MapView(canvas, mapImage);
   mapView.render();
 
   // region detection
-  var g = canvas.getContext('2d');
+  const g = canvas.getContext('2d');
   canvas.onclick = function (evt) {
     var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
-    const shape = detectRegion(imageData, evt.layerX, evt.layerY, [255, 255, 255, 255]);
-    // paint raion
-    const minX = shape.reduce((min, point) => Math.min(min, point.x), canvas.width);
-    const minY = shape.reduce((min, point) => Math.min(min, point.y), canvas.height);
+    const area = detectRegion(imageData, evt.clientX, evt.clientY, [255, 255, 255, 255]);
+    // paint district
+    const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
+    const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
 
-    // outline
-    // console.table(shape);
-    const pointIndex = new PointIndex();
-    shape.forEach((point) => pointIndex.addPoint(point));
+    const districtCtx = districtViewCanvas.getContext('2d');
+    districtCtx.fillStyle = '#cccccc';
+    districtCtx.fillRect(0, 0, districtViewCanvas.width, districtViewCanvas.height);
+    const shapeOutline = outline(area);
 
-    const isPointOnMargin = (point) => {
-      const {x, y} = point;
-      for(var dx = -1; dx <= 1; dx++) {
-        for(var dy = -1; dy <= 1; dy++) {
-          if (!pointIndex.hasPoint({x: x + dx, y: y + dy})) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
+    const translatedOutline = shapeOutline.map((point) => ({
+      x: point.x - minX + districtViewCanvas.width / 4,
+      y: point.y - minY + districtViewCanvas.height / 4
+    }));
+    const translatedArea = area.map((point) => ({
+      x: point.x - minX + districtViewCanvas.width / 4,
+      y: point.y - minY + districtViewCanvas.height / 4
+    }));
+    const districtImageData = districtCtx.getImageData(0, 0, districtViewCanvas.width, districtViewCanvas.height);
+    translatedArea.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 255, 0, 255]));
+    districtCtx.putImageData(districtImageData, 0, 0);
 
-    const raionCtx = raionViewCanvas.getContext('2d');
-    // raionCtx.fillStyle = '#face8d';
-    raionCtx.fillRect(0, 0, raionViewCanvas.width, raionViewCanvas.height);
-    const raionImageData = raionCtx.getImageData(0, 0, raionViewCanvas.width, raionViewCanvas.height);
-    const shapeOutline = shape.filter(isPointOnMargin);
-    console.table(shapeOutline);
-    const translatedShape = shapeOutline.map((point) => ({x: point.x - minX + raionViewCanvas.width / 2, y: point.y - minY + raionViewCanvas.height / 2}));
-    translatedShape.forEach((point) => setColor(raionImageData, point.x, point.y, [0, 196, 64, 255]));
-    raionCtx.putImageData(raionImageData, 0, 0);
+    const outlineIndex = new PointIndex(translatedOutline);
+    const pointList = trackPath(outlineIndex);
+
+    translatedOutline.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 0, 0, 255]));
+    districtCtx.putImageData(districtImageData, 0, 0);
+    debugPaint(districtImageData, pointList, () => districtCtx.putImageData(districtImageData, 0, 0), 10);
 
   };
+}
+
+function debugPaint(imageData, points, repaint, interval = 100, color = [0, 0, 255, 255]) {
+  let startTime = null;
+  let i = 0;
+
+  function render(timestamp) {
+    startTime = startTime || timestamp;
+    const progress = timestamp - startTime;
+    if (progress > interval) {
+      startTime = timestamp;  //resetting progress
+      const point = points[i];
+      setColor(imageData, point.x, point.y, color);
+      repaint();
+      i++;
+    }
+    if (i < points.length) {
+      requestAnimationFrame(render);
+    }
+  }
+
+  requestAnimationFrame(render);
 }
 
 document.onload = init();
