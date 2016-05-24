@@ -73,3 +73,17 @@ export default function trackPath(outline, startingPoint = findStartingPoint(out
   }
   return path;
 };
+
+const isPointOnMargin = (areaPointIndex) => (point) => {
+  return [N, E, S, W].map((direction) => neighborOn(point, direction))
+    .some((point) => !areaPointIndex.hasPoint(point));
+};
+
+/**
+ * Find all points on outline of area.
+ * @param area array of all shape points.
+ */
+export function outline(area) {
+  const areaPointIndex = new PointIndex(area);
+  return area.filter(isPointOnMargin(areaPointIndex));
+}

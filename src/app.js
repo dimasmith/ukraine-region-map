@@ -2,32 +2,7 @@ import MapView from "./map";
 import {setColor, detectRegion} from "./flood-fill";
 import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
-import trackPath from "./path-tracker";
-
-// Neighbor points
-const NW = {dx: -1, dy: -1, direction: 'NW'};
-const N = {dx: 0, dy: -1, direction: 'N'};
-const NE = {dx: 1, dy: -1, direction: 'NE'};
-const E = {dx: 1, dy: 0, direction: 'E'};
-const SE = {dx: 1, dy: 1, direction: 'SE'};
-const S = {dx: 0, dy: 1, direction: 'S'};
-const SW = {dx: -1, dy: 1, direction: 'SW'};
-const W = {dx: -1, dy: 0, direction: 'W'};
-const CCW = [N, NE, E, SE, S, SW, W, NW];
-const neighborOn = (point, direction) => ({x: point.x + direction.dx, y: point.y + direction.dy});
-
-function ccwStartingOn(direction = W) {
-  const startIndex = CCW.indexOf(direction);
-  return CCW.slice(startIndex).concat(CCW.slice(0, startIndex));
-}
-
-function ccwStartingAfter(direction = W) {
-  if (direction === NW) {
-    return CCW;
-  }
-  const startIndex = CCW.indexOf(direction);
-  return ccwStartingOn(CCW[startIndex + 1]);
-}
+import trackPath, {outline} from "./path-tracker";
 
 function init() {
   const zoomDebugCanvas = document.createElement('canvas');
@@ -50,7 +25,7 @@ function init() {
   mapView.render();
 
   // region detection
-  var g = canvas.getContext('2d');
+  const g = canvas.getContext('2d');
   canvas.onclick = function (evt) {
     var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
     const area = detectRegion(imageData, evt.clientX, evt.clientY, [255, 255, 255, 255]);
@@ -58,20 +33,10 @@ function init() {
     const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
     const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
 
-    // outline
-    // console.table(shape);
-    const areaPointIndex = new PointIndex();
-    area.forEach((point) => areaPointIndex.addPoint(point));
-
-    const isPointOnMargin = (point) => {
-      return CCW.map((direction) => neighborOn(point, direction))
-        .some((point) => !areaPointIndex.hasPoint(point));
-    };
-
     const districtCtx = districtViewCanvas.getContext('2d');
     districtCtx.fillStyle = '#cccccc';
     districtCtx.fillRect(0, 0, districtViewCanvas.width, districtViewCanvas.height);
-    const shapeOutline = area.filter(isPointOnMargin);
+    const shapeOutline = outline(area);
 
     const translatedOutline = shapeOutline.map((point) => ({
       x: point.x - minX + districtViewCanvas.width / 4,

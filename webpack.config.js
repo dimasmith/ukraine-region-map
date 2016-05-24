@@ -3,6 +3,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   context: path.join(__dirname, 'src'),
+  devtool: 'cheap-source-map',
   entry: {
     app: './app.js',
     statMap: './stat-map.js'
