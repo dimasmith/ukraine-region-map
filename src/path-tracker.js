@@ -39,7 +39,11 @@ function pointsEqual(point, otherPoint) {
   return point.x === otherPoint.x && point.y === otherPoint.y;
 }
 
-export default function trackPath(outline, startingPoint) {
+function findStartingPoint(outline) {
+  return outline.listPoints().sort((point, otherPoint) => point.x - otherPoint.x)[0]
+}
+
+export default function trackPath(outline, startingPoint = findStartingPoint(outline)) {
   const trackedPoints = new PointIndex();
   const path = [startingPoint];
   try {

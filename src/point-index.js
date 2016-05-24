@@ -1,7 +1,7 @@
 export default class PointIndex {
   constructor(points = []) {
     this.points = {};
-    this.indexSize = 0;
+    this.pointList = [];
     points.forEach((point) => this.addPoint(point));
   }
 
@@ -14,15 +14,19 @@ export default class PointIndex {
       this.points[x] = {};
     }
     this.points[x][y] = point;
-    this.indexSize++;
+    this.pointList.push(point);
   }
 
   hasPoint(point) {
     const {x, y} = point;
     return this.points[x] !== undefined && this.points[x][y] !== undefined;
   }
+  
+  listPoints() {
+    return this.pointList;
+  }
 
   size() {
-    return this.indexSize;
+    return this.pointList.length;
   }
 }

@@ -86,13 +86,11 @@ function init() {
     districtCtx.putImageData(districtImageData, 0, 0);
 
     const outlineIndex = new PointIndex(translatedOutline);
-    const startingPoint = translatedOutline[0];
-    
-    const pointList = trackPath(outlineIndex, startingPoint);
+    const pointList = trackPath(outlineIndex);
 
     translatedOutline.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 0, 0, 255]));
     districtCtx.putImageData(districtImageData, 0, 0);
-    debugPaint(districtImageData, pointList, () => districtCtx.putImageData(districtImageData, 0, 0), 100);
+    debugPaint(districtImageData, pointList, () => districtCtx.putImageData(districtImageData, 0, 0), 10);
 
   };
 }
