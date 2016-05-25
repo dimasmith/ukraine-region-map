@@ -1,18 +1,72 @@
+import './editor.scss';
 import MapView from "./map";
 import {setColor, detectRegion} from "./flood-fill";
 import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
 import trackPath, {outline} from "./path-tracker";
 import buildPolygon, {buildPolygonString} from './polygon-builder';
+import atu from 'json!./atu.json';
+
+const createOptionElement = (value) => {
+  const option = document.createElement('option');
+  option.value = value;
+  option.text = value;
+  return option;
+};
+
+const removeAllChildElements = (element) => {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};
+
+
+class PropertiesView {
+  constructor(props) {
+    this.onPropertiesChange(props);
+    this.onStateChange({});
+  }
+
+  onPropertiesChange(props) {
+    this.props = props;
+  }
+
+  onStateChange(state) {
+    this.state = state;
+  }
+
+  updateState(newState) {
+    this.onStateChange(newState);
+    this.render();
+  }
+
+  updateProperties(props) {
+    this.onPropertiesChange(props);
+    this.render();
+  }
+
+  render() {
+    const regions = this.props.map(region => region._id).sort();
+    const selectedRegion = this.state.region || regions[0];
+    const districts = this.props.find(region => region._id === selectedRegion).districts.sort();
+
+    const $region = document.querySelector('.properties__region');
+    const $district = document.querySelector('.properties__district');
+    const $regionOptions = regions.map(region => createOptionElement(region));
+    $regionOptions.forEach(option => $region.appendChild(option));
+    const $districtOptions = districts.map(district => createOptionElement(district));
+    $districtOptions.forEach(district => $district.appendChild(district));
+
+    $region.onchange = (value) => {
+      removeAllChildElements($district);
+      this.updateState({region: $region.value});
+    }
+  }
+}
 
 function init() {
-  const districtViewCanvas = document.createElement('canvas');
-  districtViewCanvas.width = 100;
-  districtViewCanvas.height = 100;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 982;
-  canvas.height = 673;
+  const canvas = document.getElementById('map');
+  const debugCanvas = document.querySelector('.debug__canvas');
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '982');
@@ -21,13 +75,13 @@ function init() {
   const polygonText = document.createElement('textarea');
 
   document.body.appendChild(polygonText);
-  document.body.appendChild(canvas);
-  document.body.appendChild(districtViewCanvas);
   document.body.appendChild(svg);
-
 
   var mapView = new MapView(canvas, mapImage);
   mapView.render();
+
+  const propertiesView = new PropertiesView(atu);
+  propertiesView.render();
 
   // region detection
   const g = canvas.getContext('2d');
@@ -35,24 +89,27 @@ function init() {
     const boundingRectangle = canvas.getBoundingClientRect();
     var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
     const area = detectRegion(imageData, evt.clientX - boundingRectangle.left, evt.clientY - boundingRectangle.top, [255, 255, 255, 255]);
+    if (area.length === 0) {
+      return;
+    }
     // paint district
     const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
     const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
 
-    const districtCtx = districtViewCanvas.getContext('2d');
+    const districtCtx = debugCanvas.getContext('2d');
     districtCtx.fillStyle = '#cccccc';
-    districtCtx.fillRect(0, 0, districtViewCanvas.width, districtViewCanvas.height);
+    districtCtx.fillRect(0, 0, debugCanvas.width, debugCanvas.height);
     const shapeOutline = outline(area);
 
     const translatedOutline = shapeOutline.map((point) => ({
-      x: point.x - minX + districtViewCanvas.width / 4,
-      y: point.y - minY + districtViewCanvas.height / 4
+      x: point.x - minX + debugCanvas.width / 4,
+      y: point.y - minY + debugCanvas.height / 4
     }));
     const translatedArea = area.map((point) => ({
-      x: point.x - minX + districtViewCanvas.width / 4,
-      y: point.y - minY + districtViewCanvas.height / 4
+      x: point.x - minX + debugCanvas.width / 4,
+      y: point.y - minY + debugCanvas.height / 4
     }));
-    const districtImageData = districtCtx.getImageData(0, 0, districtViewCanvas.width, districtViewCanvas.height);
+    const districtImageData = districtCtx.getImageData(0, 0, debugCanvas.width, debugCanvas.height);
     translatedArea.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 255, 0, 255]));
     districtCtx.putImageData(districtImageData, 0, 0);
 

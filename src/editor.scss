@@ -1,0 +1,16 @@
+html, body {
+  margin: 0;
+  body: 0;
+}
+
+.mapping {
+  display: flex;
+
+  .map {
+    flex-grow: 2;
+  }
+
+  .properties {
+    min-width: 480px;
+  }
+}

@@ -14,13 +14,14 @@ module.exports = {
   },
   module: {
     loaders: [
-      {test: /\.js$/, loader: 'babel'}
+      {test: /\.js$/, loader: 'babel'},
+      {test: /\.scss$/, loaders: ['style', 'css', 'sass']}
     ]
   },
   devServer: {
     contentBase: './build'
   },
   plugins: [
-    new HtmlWebpackPlugin({title: 'Map Test'})
+    new HtmlWebpackPlugin({title: 'Map Test', template: 'index.html'})
   ]
 };
