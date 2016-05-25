@@ -3,13 +3,9 @@ import {setColor, detectRegion} from "./flood-fill";
 import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
 import trackPath, {outline} from "./path-tracker";
+import buildPolygon, {buildPolygonString} from './polygon-builder';
 
 function init() {
-  const zoomDebugCanvas = document.createElement('canvas');
-  zoomDebugCanvas.width = 400;
-  zoomDebugCanvas.height = 400;
-  // document.querySelector('body').appendChild(zoomDebugCanvas);
-
   const districtViewCanvas = document.createElement('canvas');
   districtViewCanvas.width = 100;
   districtViewCanvas.height = 100;
@@ -18,8 +14,17 @@ function init() {
   canvas.width = 982;
   canvas.height = 673;
 
-  document.querySelector('body').appendChild(canvas);
-  document.querySelector('body').appendChild(districtViewCanvas);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '982');
+  svg.setAttribute('height', '673');
+
+  const polygonText = document.createElement('textarea');
+
+  document.body.appendChild(polygonText);
+  document.body.appendChild(canvas);
+  document.body.appendChild(districtViewCanvas);
+  document.body.appendChild(svg);
+
 
   var mapView = new MapView(canvas, mapImage);
   mapView.render();
@@ -27,8 +32,9 @@ function init() {
   // region detection
   const g = canvas.getContext('2d');
   canvas.onclick = function (evt) {
+    const boundingRectangle = canvas.getBoundingClientRect();
     var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
-    const area = detectRegion(imageData, evt.clientX, evt.clientY, [255, 255, 255, 255]);
+    const area = detectRegion(imageData, evt.clientX - boundingRectangle.left, evt.clientY - boundingRectangle.top, [255, 255, 255, 255]);
     // paint district
     const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
     const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
@@ -51,11 +57,15 @@ function init() {
     districtCtx.putImageData(districtImageData, 0, 0);
 
     const outlineIndex = new PointIndex(translatedOutline);
-    const pointList = trackPath(outlineIndex);
+    const translatedPath = trackPath(outlineIndex);
+    const path = trackPath(new PointIndex(shapeOutline));
+    const polygon = buildPolygon(path);
+    svg.appendChild(polygon);
+    polygonText.value = buildPolygonString(path);
 
     translatedOutline.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 0, 0, 255]));
     districtCtx.putImageData(districtImageData, 0, 0);
-    debugPaint(districtImageData, pointList, () => districtCtx.putImageData(districtImageData, 0, 0), 10);
+    debugPaint(districtImageData, translatedPath, () => districtCtx.putImageData(districtImageData, 0, 0), 10);
 
   };
 }
