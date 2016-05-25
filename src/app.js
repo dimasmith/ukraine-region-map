@@ -1,12 +1,12 @@
-import './editor.scss';
+import "./editor.scss";
 import MapView from "./map";
 import {setColor, detectRegion} from "./flood-fill";
 import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
 import trackPath, {outline} from "./path-tracker";
-import buildPolygon, {buildPolygonString} from './polygon-builder';
-import {loadRegions, storeRegion} from './storage-browser';
-import atu from 'json!./atu.json';
+import buildPolygon, {buildPolygonString} from "./polygon-builder";
+import {loadRegions, storeRegion} from "./storage-browser";
+import atu from "json!./atu.json";
 
 const createOptionElement = (value) => {
   const option = document.createElement('option');
@@ -22,6 +22,7 @@ const removeAllChildElements = (element) => {
 };
 
 let path = [];
+let progressMap;
 
 class PropertiesView {
   constructor(props) {
@@ -66,7 +67,8 @@ class PropertiesView {
     };
 
     $saveButton.onclick = () => {
-      storeRegion($region.value, $district.value, buildPolygonString(path))
+      storeRegion($region.value, $district.value, buildPolygonString(path));
+      progressMap.appendChild(buildPolygon(path));
     }
   }
 }
@@ -80,7 +82,8 @@ const createElementFromString = (string) => {
 function init() {
   const canvas = document.getElementById('map');
   const debugCanvas = document.querySelector('.debug__canvas');
-  const svg = document.getElementById('progress');
+  progressMap = document.getElementById('progress');
+  progressMap.style.backgroundImage = `url(${mapImage})`;
 
   const mapView = new MapView(canvas, mapImage);
   const propertiesView = new PropertiesView(atu);
@@ -90,7 +93,7 @@ function init() {
 
   const mappedRegions = loadRegions();
   mappedRegions.map(entry => entry.polygon)
-    .forEach(polygon => svg.appendChild(createElementFromString(polygon)));
+    .forEach(polygon => progressMap.innerHTML += polygon);
 
   // region detection
   const g = canvas.getContext('2d');
@@ -109,8 +112,6 @@ function init() {
     const shapeOutline = outline(area);
 
     path = trackPath(new PointIndex(shapeOutline));
-    const polygon = buildPolygon(path);
-    svg.appendChild(polygon);
 
     // const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
     // const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
