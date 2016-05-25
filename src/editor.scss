@@ -6,6 +6,10 @@ html, body {
 .mapping {
   display: flex;
 
+  .debug {
+    display: none;
+  }
+
   .map {
     flex-grow: 2;
   }

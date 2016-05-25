@@ -13,7 +13,7 @@ export default class MapView {
     this.backgroundImage.src = background;
   }
 
-  showOverlayShape(shape, color = [128, 128, 128, 128]) {
+  highlightRegion(shape, color = [255, 255, 0, 255]) {
     this.overlay = {
       shape, color
     };
