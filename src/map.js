@@ -1,3 +1,5 @@
+import {setColor} from './flood-fill';
+
 export default class MapView {
 
  constructor(canvas, background) {
@@ -6,21 +8,24 @@ export default class MapView {
     this.height = canvas.height;
     this.model = {points: []};
     // initialize background
-    var backgroundImage = new Image();
-    backgroundImage.onload = this.renderBackground.bind(this, backgroundImage);
-    backgroundImage.src = background;
-    this.backgroundReady = false;
+    this.backgroundImage = new Image();
+    this.backgroundImage.onload = () => this.render();
+    this.backgroundImage.src = background;
   }
 
-  renderBackground(backgroundImage) {
-    this.g.save();
-    this.g.drawImage(backgroundImage, 0, 0);
-    this.g.restore();
-    this.backgroundReady = true;
+  showOverlayShape(shape, color = [128, 128, 128, 128]) {
+    this.overlay = {
+      shape, color
+    };
     this.render();
-  };
+  }
 
   render() {
-
+    this.g.drawImage(this.backgroundImage, 0, 0);
+    if (this.overlay) {
+      const imageData = this.g.getImageData(0, 0, this.width, this.height);
+      this.overlay.shape.forEach(point => setColor(imageData, point.x, point.y, this.overlay.color));
+      this.g.putImageData(imageData, 0, 0);
+    }
   };
 }

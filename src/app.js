@@ -46,9 +46,9 @@ class PropertiesView {
   }
 
   render() {
-    const regions = this.props.map(region => region._id).sort();
+    const regions = this.props.map(region => region.region).sort();
     const selectedRegion = this.state.region || regions[0];
-    const districts = this.props.find(region => region._id === selectedRegion).districts.sort();
+    const districts = this.props.find(region => region.region === selectedRegion).districts.sort();
 
     const $region = document.querySelector('.properties__region');
     const $district = document.querySelector('.properties__district');
@@ -92,6 +92,7 @@ function init() {
     if (area.length === 0) {
       return;
     }
+    mapView.showOverlayShape(area);
     // paint district
     const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
     const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
