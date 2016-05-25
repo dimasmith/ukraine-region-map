@@ -6,6 +6,7 @@ import PointIndex from "./point-index";
 import trackPath, {outline} from "./path-tracker";
 import buildPolygon, {buildPolygonString} from "./polygon-builder";
 import {loadRegions, storeRegion} from "./storage-browser";
+import {sendDistrict} from "./rest";
 import atu from "json!./atu.json";
 
 const createOptionElement = (value) => {
@@ -70,9 +71,20 @@ class PropertiesView {
       if (!path.length) {
         alert('Please select district before saving');
       }
-      storeRegion($region.value, $district.value, buildPolygonString(path));
-      progressMap.appendChild(buildPolygon(path));
-      path = [];
+
+      const polygonString = buildPolygonString(path);
+      const region = $region.value;
+      const district = $district.value;
+      storeRegion(region, district, polygonString);
+      sendDistrict({
+        key: `${region}/${district}`.toLowerCase(),
+        region,
+        district,
+        polygon: polygonString
+      }).then(response => {
+        progressMap.appendChild(buildPolygon(path));
+        path = []; // bad function. bad. side-effects. I will change it
+      });
     }
   }
 }

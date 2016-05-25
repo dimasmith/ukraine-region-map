@@ -19,7 +19,12 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: './build'
+    contentBase: './build',
+    proxy: {
+      '/api/v1/*': {
+        target: 'http://localhost:8000'
+      }
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({title: 'Map Test', template: 'index.html'})

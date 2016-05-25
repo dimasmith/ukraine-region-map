@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "0.1.0",
   "scripts": {
-    "build": "./node_modules/.bin/webpack",
+    "compile-client": "webpack",
+    "compile-server": "babel server.js -d build",
+    "build": "npm run compile-client && npm run compile-server",
     "clean": "rimraf build",
     "test": "mocha --compilers js:babel-core/register",
-    "start": "./node_modules/.bin/webpack-dev-server"
+    "start-server": "npm run compile-server && node build/server.js",
+    "start": "webpack-dev-server"
   },
   "babel": {
     "presets": [
@@ -16,6 +19,7 @@
   "author": "Dmytro Kovalchuk <dimasmith@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "babel-cli": "^6.9.0",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
     "chai": "^3.5.0",
@@ -31,5 +35,8 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.13.0",
     "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1"
   }
 }
