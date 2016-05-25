@@ -67,8 +67,12 @@ class PropertiesView {
     };
 
     $saveButton.onclick = () => {
+      if (!path.length) {
+        alert('Please select district before saving');
+      }
       storeRegion($region.value, $district.value, buildPolygonString(path));
       progressMap.appendChild(buildPolygon(path));
+      path = [];
     }
   }
 }
