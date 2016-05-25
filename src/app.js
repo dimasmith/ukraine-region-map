@@ -18,9 +18,12 @@ function init() {
   svg.setAttribute('width', '982');
   svg.setAttribute('height', '673');
 
-  document.querySelector('body').appendChild(canvas);
-  document.querySelector('body').appendChild(districtViewCanvas);
-  document.querySelector('body').appendChild(svg);
+  const polygonText = document.createElement('textarea');
+
+  document.body.appendChild(polygonText);
+  document.body.appendChild(canvas);
+  document.body.appendChild(districtViewCanvas);
+  document.body.appendChild(svg);
 
 
   var mapView = new MapView(canvas, mapImage);
@@ -58,6 +61,7 @@ function init() {
     const path = trackPath(new PointIndex(shapeOutline));
     const polygon = buildPolygon(path);
     svg.appendChild(polygon);
+    polygonText.value = buildPolygonString(path);
 
     translatedOutline.forEach((point) => setColor(districtImageData, point.x, point.y, [255, 0, 0, 255]));
     districtCtx.putImageData(districtImageData, 0, 0);
