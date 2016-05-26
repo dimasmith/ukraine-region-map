@@ -5,8 +5,7 @@ import mapImage from "url?!../assets/giz2-map-white.png";
 import PointIndex from "./point-index";
 import trackPath, {outline} from "./path-tracker";
 import buildPolygon, {buildPolygonString} from "./polygon-builder";
-import {loadRegions, storeRegion} from "./storage-browser";
-import {sendDistrict} from "./rest";
+import {sendDistrict, fetchRegions} from "./rest";
 import atu from "json!./atu.json";
 
 const createOptionElement = (value) => {
@@ -75,7 +74,6 @@ class PropertiesView {
       const polygonString = buildPolygonString(path);
       const region = $region.value;
       const district = $district.value;
-      storeRegion(region, district, polygonString);
       sendDistrict({
         key: `${region}/${district}`.toLowerCase(),
         region,
@@ -89,12 +87,6 @@ class PropertiesView {
   }
 }
 
-const createElementFromString = (string) => {
-  const wrapper = document.createElement('svg');
-  wrapper.innerHTML = string;
-  return wrapper.firstChild;
-};
-
 function init() {
   const canvas = document.getElementById('map');
   const debugCanvas = document.querySelector('.debug__canvas');
@@ -107,9 +99,13 @@ function init() {
   mapView.render();
   propertiesView.render();
 
-  const mappedRegions = loadRegions();
-  mappedRegions.map(entry => entry.polygon)
-    .forEach(polygon => progressMap.innerHTML += polygon);
+  fetchRegions().then(response => {
+    response.json().then(mappedDistricts => {
+      mappedDistricts.map(entry => entry.polygon)
+        .forEach(polygon => progressMap.innerHTML += polygon);
+    });
+  });
+
 
   // region detection
   const g = canvas.getContext('2d');

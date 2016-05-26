@@ -1,12 +1,34 @@
 import express from "express";
 import bodyParser from "body-parser";
+import {MongoClient} from 'mongodb';
 
 const app = express();
 app.use(express.static(__dirname));
 app.use(bodyParser.json());
-app.post('/api/v1/districts', (req, resp) => {
-  console.log(req.body);
-  resp.sendStatus(200);
+
+MongoClient.connect('mongodb://localhost:27017/giz2', (err, db) => {
+
+  const districtsCollection = db.collection('districts');
+
+  app.post('/api/v1/districts', (req, resp) => {
+    const district = req.body;
+    district._id = district.key;
+    districtsCollection.insertOne(district, (err, result) => {
+      if (!err && result.insertedCount === 1) {
+        resp.sendStatus(200);
+      }
+    });
+  });
+
+  app.get('/api/v1/districts', (req, resp) => {
+    districtsCollection.find().toArray((err, districts) => {
+      resp.status(200).json(districts);
+    });
+  });
+
+
 });
+
+
 
 app.listen(8000);
