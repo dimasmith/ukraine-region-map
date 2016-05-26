@@ -1,4 +1,4 @@
-import PointIndex from "./point-index";
+import PointIndex from './point-index';
 
 export const NW = { dx: -1, dy: -1, direction: 'NW' };
 export const N = { dx: 0, dy: -1, direction: 'N' };

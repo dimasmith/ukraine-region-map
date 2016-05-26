@@ -1,4 +1,4 @@
-import { setColor } from "./flood-fill";
+import { setColor } from './flood-fill';
 
 export function debugPaint(imageData, points, repaint, interval = 100, color = [0, 0, 255, 255]) {
   let startTime = null;

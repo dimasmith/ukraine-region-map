@@ -1,4 +1,4 @@
-import { setColor } from "./flood-fill";
+import { setColor } from './flood-fill';
 
 export default class MapView {
 

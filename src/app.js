@@ -1,12 +1,12 @@
-import "./editor.scss";
-import MapView from "./map";
-import { detectRegion } from "./flood-fill";
-import PointIndex from "./point-index";
-import trackPath, { outline } from "./path-tracker";
-import buildPolygon, { buildPolygonString } from "./polygon-builder";
-import { sendDistrict, fetchRegions } from "./rest";
-import atu from "json!./atu.json";
-import mapImage from "url?!../assets/giz2-map-white.png";
+import './editor.scss';
+import MapView from './map';
+import { detectRegion } from './flood-fill';
+import PointIndex from './point-index';
+import trackPath, { outline } from './path-tracker';
+import buildPolygon, { buildPolygonString } from './polygon-builder';
+import { sendDistrict, fetchRegions } from './rest';
+import atu from 'json!./atu.json';
+import mapImage from 'url?!../assets/giz2-map-white.png';
 
 // Import default assets. Will be replaced by configurable assets in later versions.
 
