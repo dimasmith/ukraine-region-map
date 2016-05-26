@@ -1,0 +1,11 @@
+version: '2'
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - map-data:/data/db
+volumes:
+  map-data:
+    driver: local
