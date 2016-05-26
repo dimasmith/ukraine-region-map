@@ -9,7 +9,7 @@ export default class PointIndex {
     if (this.hasPoint(point)) {
       return;
     }
-    const {x, y} = point;
+    const { x, y } = point;
     if (!this.points[x]) {
       this.points[x] = {};
     }
@@ -18,10 +18,10 @@ export default class PointIndex {
   }
 
   hasPoint(point) {
-    const {x, y} = point;
+    const { x, y } = point;
     return this.points[x] !== undefined && this.points[x][y] !== undefined;
   }
-  
+
   listPoints() {
     return this.pointList;
   }

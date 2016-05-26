@@ -1,12 +1,14 @@
 import "./editor.scss";
 import MapView from "./map";
-import {setColor, detectRegion} from "./flood-fill";
-import mapImage from "url?!../assets/giz2-map-white.png";
+import { detectRegion } from "./flood-fill";
 import PointIndex from "./point-index";
-import trackPath, {outline} from "./path-tracker";
-import buildPolygon, {buildPolygonString} from "./polygon-builder";
-import {sendDistrict, fetchRegions} from "./rest";
+import trackPath, { outline } from "./path-tracker";
+import buildPolygon, { buildPolygonString } from "./polygon-builder";
+import { sendDistrict, fetchRegions } from "./rest";
 import atu from "json!./atu.json";
+import mapImage from "url?!../assets/giz2-map-white.png";
+
+// Import default assets. Will be replaced by configurable assets in later versions.
 
 const createOptionElement = (value) => {
   const option = document.createElement('option');
@@ -61,14 +63,14 @@ class PropertiesView {
     const $districtOptions = districts.map(district => createOptionElement(district));
     $districtOptions.forEach(district => $district.appendChild(district));
 
-    $region.onchange = (value) => {
+    $region.onchange = () => {
       removeAllChildElements($district);
-      this.updateState({region: $region.value});
+      this.updateState({ region: $region.value });
     };
 
     $saveButton.onclick = () => {
       if (!path.length) {
-        alert('Please select district before saving');
+        console.error('Please select district before saving');
       }
 
       const polygonString = buildPolygonString(path);
@@ -78,12 +80,12 @@ class PropertiesView {
         key: `${region}/${district}`.toLowerCase(),
         region,
         district,
-        polygon: polygonString
-      }).then(response => {
+        polygon: polygonString,
+      }).then(() => {
         progressMap.appendChild(buildPolygon(path));
         path = []; // bad function. bad. side-effects. I will change it
       });
-    }
+    };
   }
 }
 
@@ -101,18 +103,20 @@ function init() {
 
   fetchRegions().then(response => {
     response.json().then(mappedDistricts => {
-      mappedDistricts.map(entry => entry.polygon)
-        .forEach(polygon => progressMap.innerHTML += polygon);
+      progressMap.innerHTML = mappedDistricts
+        .map(entry => entry.polygon)
+        .reduce((source, polygon) => source + polygon);
     });
   });
 
-
   // region detection
   const g = canvas.getContext('2d');
-  canvas.onclick = function (evt) {
+  canvas.onclick = (evt) => {
     const boundingRectangle = canvas.getBoundingClientRect();
-    var imageData = g.getImageData(0, 0, canvas.width, canvas.height);
-    const area = detectRegion(imageData, evt.clientX - boundingRectangle.left, evt.clientY - boundingRectangle.top, [255, 255, 255, 255]);
+    const imageData = g.getImageData(0, 0, canvas.width, canvas.height);
+    const x = evt.clientX - boundingRectangle.left;
+    const y = evt.clientY - boundingRectangle.top;
+    const area = detectRegion(imageData, x, y, [255, 255, 255, 255]);
     if (area.length === 0) {
       return;
     }
@@ -124,49 +128,7 @@ function init() {
     const shapeOutline = outline(area);
 
     path = trackPath(new PointIndex(shapeOutline));
-
-    // const minX = area.reduce((min, point) => Math.min(min, point.x), canvas.width);
-    // const minY = area.reduce((min, point) => Math.min(min, point.y), canvas.height);
-    // const translatedOutline = shapeOutline.map((point) => ({
-    //   x: point.x - minX + debugCanvas.width / 4,
-    //   y: point.y - minY + debugCanvas.height / 4
-    // }));
-    // const translatedArea = area.map((point) => ({
-    //   x: point.x - minX + debugCanvas.width / 4,
-    //   y: point.y - minY + debugCanvas.height / 4
-    // }));
-    // const debugImageData = districtCtx.getImageData(0, 0, debugCanvas.width, debugCanvas.height);
-    // translatedArea.forEach((point) => setColor(debugImageData, point.x, point.y, [255, 255, 0, 255]));
-    // districtCtx.putImageData(debugImageData, 0, 0);
-
-    // const outlineIndex = new PointIndex(translatedOutline);
-    // const translatedPath = trackPath(outlineIndex);
-    // translatedOutline.forEach((point) => setColor(debugImageData, point.x, point.y, [255, 0, 0, 255]));
-    // districtCtx.putImageData(debugImageData, 0, 0);
-    // debugPaint(debugImageData, translatedPath, () => districtCtx.putImageData(debugImageData, 0, 0), 10);
   };
-}
-
-function debugPaint(imageData, points, repaint, interval = 100, color = [0, 0, 255, 255]) {
-  let startTime = null;
-  let i = 0;
-
-  function render(timestamp) {
-    startTime = startTime || timestamp;
-    const progress = timestamp - startTime;
-    if (progress > interval) {
-      startTime = timestamp;  //resetting progress
-      const point = points[i];
-      setColor(imageData, point.x, point.y, color);
-      repaint();
-      i++;
-    }
-    if (i < points.length) {
-      requestAnimationFrame(render);
-    }
-  }
-
-  requestAnimationFrame(render);
 }
 
 document.onload = init();

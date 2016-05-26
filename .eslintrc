@@ -3,5 +3,8 @@
   "extends": "airbnb",
   "parser-options": {
     "sourceType": "module"
+  },
+  "rules": {
+    "import/no-unresolved": 1
   }
 }

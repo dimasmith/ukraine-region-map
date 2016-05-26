@@ -6,6 +6,5 @@ export default function buildPolygon(points) {
 
 export function buildPolygonString(points) {
   const pointList = points.map(point => `${point.x},${point.y}`).join(' ');
-  return `<polygon points="${pointList}"/>`
-
+  return `<polygon points="${pointList}"/>`;
 }
