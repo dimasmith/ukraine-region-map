@@ -1,0 +1,7 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "parser-options": {
+    "sourceType": "module"
+  }
+}
