@@ -1,19 +1,16 @@
+const jsonHeaders = new Headers({
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+});
+
 export function sendDistrict(district) {
-  const headers = new Headers({
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  });
   return fetch('/api/v1/districts', {
     method: 'POST',
     body: JSON.stringify(district),
-    headers
+    headers: jsonHeaders,
   });
 }
 
 export function fetchRegions() {
-  const headers = new Headers({
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  });
-  return fetch('/api/v1/districts', {headers});
+  return fetch('/api/v1/districts', { headers: jsonHeaders });
 }

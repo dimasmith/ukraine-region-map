@@ -1,5 +1,5 @@
 export function storeRegion(region, district, polygon) {
-  const data = {region, district, polygon};
+  const data = { region, district, polygon };
   const key = `${region}/${district}`.toLowerCase();
   window.localStorage.setItem(key, JSON.stringify(data));
 }
