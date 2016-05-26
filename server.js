@@ -16,6 +16,14 @@ MongoClient.connect('mongodb://localhost:27017/giz2', (err, db) => {
     districtsCollection.insertOne(district, (err, result) => {
       if (!err && result.insertedCount === 1) {
         resp.sendStatus(200);
+      } else {
+        districtsCollection.replaceOne({_id: district._id}, district, (err, result) => {
+          if (!err && result.modifiedCount === 1) {
+            resp.sendStatus(200);
+          } else {
+            console.log(err, result);
+          }
+        })
       }
     });
   });
