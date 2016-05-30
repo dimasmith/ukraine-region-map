@@ -6,10 +6,10 @@ class Points {
   constructor(points = []) {
     this.points = {};
     this.pointList = [];
-    points.forEach((point) => this.addPoint(point));
+    points.forEach((point) => this.addPointIfNotPresent(point));
   }
 
-  addPoint(point) {
+  addPointIfNotPresent(point) {
     if (this.hasPoint(point)) {
       return;
     }

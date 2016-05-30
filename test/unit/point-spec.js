@@ -5,7 +5,7 @@ describe('point index', () => {
   it('reports existing point as present', () => {
     const point = { x: 1, y: 2 };
     const pointIndex = new PointIndex();
-    pointIndex.addPoint(point);
+    pointIndex.addPointIfNotPresent(point);
 
     expect(pointIndex.hasPoint({ x: 1, y: 2 })).to.eql(true);
   });
@@ -17,7 +17,7 @@ describe('point index', () => {
 
   it('counts point upon adding points', () => {
     const newIndex = new PointIndex();
-    newIndex.addPoint({ x: 1, y: 2 });
+    newIndex.addPointIfNotPresent({ x: 1, y: 2 });
     expect(newIndex.size()).to.eql(1);
   });
 

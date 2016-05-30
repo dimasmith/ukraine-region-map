@@ -2,13 +2,10 @@ import Points from './points';
 
 function trackArea(raster, x, y, color) {
   const pixelQueue = [];
-  const shape = [];
-  const points = {};
-
-  const key = (point) => `${point.x};${point.y}`;
+  const trackedPoints = new Points();
 
   const pointShouldBeFilled = (point) => raster.getColor(point)
-    .equalTo(color) && !points[key(point)];
+    .equalTo(color) && !trackedPoints.hasPoint(point);
 
   if (!pointShouldBeFilled({ x, y })) {
     return new Points();
@@ -32,10 +29,7 @@ function trackArea(raster, x, y, color) {
     const endX = east.x;
     for (let j = startX + 1; j < endX; j++) {
       const point = { x: j, y: n.y };
-      if (!points[key(point)]) {
-        points[key(point)] = point;
-        shape.push(point);
-      }
+      trackedPoints.addPointIfNotPresent(point);
     }
 
     for (let i = startX; i < endX; i++) {
@@ -49,7 +43,7 @@ function trackArea(raster, x, y, color) {
       }
     }
   }
-  return new Points(shape);
+  return trackedPoints;
 }
 
 const NW = { dx: -1, dy: -1, direction: 'NW' };
@@ -107,12 +101,12 @@ function trackPath(shapeOutline, startingPoint = findStartingPoint(shapeOutline)
     .find(direction => shapeOutline.hasPoint(neighborOn(startingPoint, direction)));
   let nextPoint = neighborOn(startingPoint, nextDirection);
   let previousPointDirection = findOppositeDirection(nextDirection);
-  trackedPoints.addPoint(startingPoint);
+  trackedPoints.addPointIfNotPresent(startingPoint);
   while (!pointsEqual(nextPoint, startingPoint) && path.length <= shapeOutline.size()) {
     if (!trackedPoints.hasPoint(nextPoint)) {
       path.push(nextPoint);
     }
-    trackedPoints.addPoint(nextPoint);
+    trackedPoints.addPointIfNotPresent(nextPoint);
     nextDirection = ccwStartingAfter(previousPointDirection)
       .find(hasPointOnDirection(shapeOutline, trackedPoints, nextPoint));
     if (nextDirection) {
