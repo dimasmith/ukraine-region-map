@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import PointIndex from '../../src/point-index';
-import trackPath from '../../src/path-tracker';
+import PointIndex from '../../src/graphics/raster/point-index';
+import trackPath from '../../src/graphics/raster/path-tracker';
 
 describe('path tracker', () => {
   /**

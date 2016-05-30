@@ -1,14 +1,13 @@
-import './editor.scss';
-import MapView from './map';
-import { detectRegion } from './flood-fill';
-import PointIndex from './point-index';
-import trackPath, { outline } from './path-tracker';
-import buildPolygon, { buildPolygonString } from './polygon-builder';
+import './sass/editor.scss';
+import MapView from './views/map-view';
+import { detectRegion } from './graphics/raster/flood-fill';
+import PointIndex from './graphics/raster/point-index';
+import trackPath, { outline } from './graphics/raster/path-tracker';
+import buildPolygon, { buildPolygonString } from './graphics/svg/polygon-builder';
 import { sendDistrict, fetchRegions } from './rest';
-import atu from 'json!./atu.json';
-import mapImage from 'url?!../assets/giz2-map-regions-white.png';
-
-// Import default assets. Will be replaced by configurable assets in later versions.
+// those imports will be replaced with configurable assets later on
+import atu from 'json!../examples/ukraine/regions.json';
+import mapImage from 'url?!../examples/ukraine/detailed-map.png';
 
 const createOptionElement = (value) => {
   const option = document.createElement('option');
