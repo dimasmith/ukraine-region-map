@@ -10,7 +10,9 @@
     "test": "mocha --compilers js:babel-core/register",
     "start-server": "npm run compile-server && node build/server.js",
     "start": "webpack-dev-server",
-    "lint": "eslint src"
+    "lint": "npm run lint-source && npm run lint-unit-test",
+    "lint-source": "eslint src",
+    "lint-unit-test": "eslint test/unit"
   },
   "babel": {
     "presets": [
