@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 MongoClient.connect('mongodb://localhost:27017/giz2', (err, db) => {
 
-  const districtsCollection = db.collection('districts');
+  const districtsCollection = db.collection('regions');
 
   app.post('/api/v1/districts', (req, resp) => {
     const district = req.body;
