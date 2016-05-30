@@ -7,7 +7,7 @@ function trackArea(raster, x, y, color) {
 
   const key = (point) => `${point.x};${point.y}`;
 
-  const pointShouldBeFilled = (point) => raster.getColor(point.x, point.y)
+  const pointShouldBeFilled = (point) => raster.getColor(point)
     .equalTo(color) && !points[key(point)];
 
   if (!pointShouldBeFilled({ x, y })) {

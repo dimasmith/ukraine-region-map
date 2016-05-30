@@ -26,12 +26,14 @@ class Raster {
     this.data = imageData.data;
   }
 
-  getColor(x, y) {
+  getColor(point) {
+    const { x, y } = point;
     const startIndex = y * this.width * 4 + x * 4;
     return new Color(this.imageData.data.slice(startIndex, startIndex + 4));
   }
 
-  setColor(x, y, color) {
+  setColor(point, color) {
+    const { x, y } = point;
     const startIndex = y * this.width * 4 + x * 4;
     const data = this.data;
     data[startIndex] = color.r;
@@ -41,7 +43,7 @@ class Raster {
   }
 
   drawPoints(points, color) {
-    points.forEach(point => this.setColor(point.x, point.y, color));
+    points.forEach(point => this.setColor(point, color));
   }
 }
 
