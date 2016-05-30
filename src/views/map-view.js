@@ -1,4 +1,4 @@
-import { setColor } from '../graphics/raster/flood-fill';
+import { Color, Raster } from '../graphics/raster/raster';
 
 export default class MapView {
 
@@ -12,7 +12,7 @@ export default class MapView {
     this.backgroundImage.src = background;
   }
 
-  highlightRegion(shape, color = [255, 255, 0, 255]) {
+  highlightRegion(shape, color = new Color([255, 255, 0, 255])) {
     this.overlay = { shape, color };
     this.render();
   }
@@ -21,8 +21,8 @@ export default class MapView {
     this.g.drawImage(this.backgroundImage, 0, 0);
     if (this.overlay) {
       const imageData = this.g.getImageData(0, 0, this.width, this.height);
-      this.overlay.shape.forEach(point =>
-        setColor(imageData, point.x, point.y, this.overlay.color));
+      const raster = new Raster(imageData);
+      raster.drawPoints(this.overlay.shape, this.overlay.color);
       this.g.putImageData(imageData, 0, 0);
     }
   }

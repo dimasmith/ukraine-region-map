@@ -1,4 +1,8 @@
-export default class PointIndex {
+/**
+ * Contains set of points. Quickly checks for point presence.
+ * Points keep order in which it was added.
+ */
+class Points {
   constructor(points = []) {
     this.points = {};
     this.pointList = [];
@@ -29,4 +33,18 @@ export default class PointIndex {
   size() {
     return this.pointList.length;
   }
+
+  filter(predicate) {
+    return new Points(this.pointList.filter(predicate));
+  }
+
+  forEach(consumer) {
+    this.pointList.forEach(consumer);
+  }
+
+  isEmpty() {
+    return this.pointList.length === 0;
+  }
 }
+
+export default Points;

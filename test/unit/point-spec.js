@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import PointIndex from '../../src/graphics/raster/point-index';
+import PointIndex from '../../src/graphics/raster/points';
 
 describe('point index', () => {
   it('reports existing point as present', () => {
