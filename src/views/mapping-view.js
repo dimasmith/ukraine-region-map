@@ -39,6 +39,7 @@ class MappingView {
     const regions = this.props.map(region => region.region).sort();
     const selectedRegion = this.state.region || regions[0];
     const districts = this.props.find(region => region.region === selectedRegion).districts.sort();
+    const selectedDistrict = this.state.district || districts[0];
 
     const $region = document.querySelector('.properties__region');
     const $district = document.querySelector('.properties__district');
@@ -48,9 +49,16 @@ class MappingView {
     const $districtOptions = districts.map(district => createOptionElement(district));
     $districtOptions.forEach(district => $district.appendChild(district));
 
+    $region.value = selectedRegion;
+    $district.value = selectedDistrict;
+
     $region.onchange = () => {
       removeAllChildElements($district);
       this.updateState({ region: $region.value });
+    };
+
+    $district.onchange = () => {
+      this.updateState({ region: $region.value, district: $district.value });
     };
 
     $saveButton.onclick = () => {
@@ -60,6 +68,14 @@ class MappingView {
 
   onSave(callback) {
     this.saveCallback = callback;
+  }
+
+  save() {
+    this.saveCallback(this.state.region, this.state.district);
+  }
+
+  select(region, district) {
+    this.updateState({ region, district });
   }
 }
 

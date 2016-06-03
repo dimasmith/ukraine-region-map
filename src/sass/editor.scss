@@ -5,6 +5,17 @@ html, body {
 
 .mapping {
   display: flex;
+  flex-direction: column;
+
+  .maps {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .settings {
+    display: flex;
+    flex-direction: column;
+  }
 
   .debug {
     display: none;
@@ -17,4 +28,13 @@ html, body {
   .properties {
     min-width: 480px;
   }
+}
+
+polygon {
+  fill: white;
+  stroke: black;
+}
+
+circle {
+  fill: red;
 }

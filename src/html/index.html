@@ -6,22 +6,31 @@
 </head>
 <body>
 <div class="mapping">
-  <div class="map">
-    <canvas id="map" width="982" height="673"></canvas>
-  </div>
-  <div class="properties">
-    <div class="debug">
-      <canvas class="debug__canvas" width="100" height="100"></canvas>
+  <div class="maps">
+    <div class="map">
+      <canvas id="map" width="982" height="673"></canvas>
     </div>
-    <label for="region">Region</label>
-    <select name="region" id="region" class="properties__region"></select>
-    <label for="district">District</label>
-    <select name="district" id="district" class="properties__district"></select>
-    <button class="properties__save-button">Save</button>
+    <div class="progress">
+      <svg id="progress" width="982" height="673"></svg>
+    </div>
   </div>
-</div>
-<div class="progress">
-  <svg id="progress" width="982" height="673"></svg>
+  <div class="settings">
+    <div class="properties">
+      <div class="debug">
+        <canvas class="debug__canvas" width="100" height="100"></canvas>
+      </div>
+      <label for="region">Region</label>
+      <select name="region" id="region" class="properties__region"></select>
+      <label for="district">District</label>
+      <select name="district" id="district" class="properties__district"></select>
+      <button class="properties__save-button">Save</button>
+    </div>
+    <div class="remap-stats">
+      <span class="remap-stats__number"></span>
+      <button class="remap-stats__previous-button">Previous</button>
+      <button class="remap-stats__next-button">Next</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
